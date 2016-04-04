@@ -19,6 +19,7 @@ weights = (
     ('T', 11)
 )
 
+
 class Card(object):
     def __init__(self, rank, weight):
         self.rank = rank
@@ -30,10 +31,17 @@ class Card(object):
     def __int__(self):
         return self.weight
 
+    def __eq__(self, other):
+        if self.__class__ == other.__class__:
+            return self.rank == other.rank and self.weight == other.weight
+        return self == other
+
 
 class Game(object):
+    ACE = Card('T', 11)
+
     def __init__(self):
-        self.deck = [Card(r, w) for r, w in weights] * 4
+        self.deck = [Card(r, w) for r, w in weights * 4]
         self.hand = []
         random.shuffle(self.deck)
 
@@ -41,14 +49,19 @@ class Game(object):
         return self.hand[-1] if self.hand else None
 
     def take_card(self):
-        self.hand.append(self.deck.pop())
+        card = self.deck.pop()
 
-    def is_over(self):
-        return sum([int(c) for c in self.hand]) > 21
+        if sum(self.score()) + card.weight > 21:
+            try:
+                i = self.hand.index(self.ACE)
+                self.hand[i].weight = 1
+            except ValueError:
+                pass
+
+        self.hand.append(card)
 
     def score(self):
-        is_over = self.is_over()
-        return [1 if is_over and int(i) == 11 else int(i) for i in self.hand]
+        return [int(i) for i in self.hand]
 
     def total(self):
         return sum(self.score())
