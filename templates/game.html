@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+{% if game.last_taken() %}
+    <h1>Выпавшая карта: {{ game.last_taken() }}</h1>
+{% endif %}
+<h1>Ваши карты: {{ game.hand|join (', ')}}</h1>
+<h1>Количество очков по картам: {{ game.score() }}</h1>
+<h1>Количество очков: {{ game.total() }}</h1>
+{% with status = game.status() %}
+    {% if status == 'lose' %}
+        <h1>Вы проиграли.</h1>
+    {% elif status == 'win' %}
+        <h1>Вы победили!</h1>
+    {% else %}
+        <form action="" method="POST">
+            <input type='submit' value='Взять карту'>
+        </form>
+    {% endif %}
+{% endwith %}
+
+<h1><a href="{{ url_for('index') }}">Выход</a></h1>
+<h1><a href="{{ url_for('game') }}?new">Новая игра</a></h1>
