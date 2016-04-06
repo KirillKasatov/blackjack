@@ -43,6 +43,7 @@ class Game(object):
     def __init__(self):
         self.deck = [Card(r, w) for r, w in weights * 4]
         self.hand = []
+        self.dealers_hand = []
         random.shuffle(self.deck)
 
     def last_taken(self):
@@ -66,14 +67,31 @@ class Game(object):
     def total(self):
         return sum(self.score())
 
+    def dealer_take_cards(self):
+        while self.dealers_total() < 17:
+            card = self.deck.pop()
+            self.dealers_hand.append(card)
+
+    def dealers_total(self):
+        return sum([int(i) for i in self.dealers_hand])
+
     def status(self):
         total = self.total()
+        dealers_total = self.dealers_total()
+
         if total > 21:
             return 'lose'
-        elif total == 21:
-            return 'win'
-        # elif dealers_total
-        return 'unknown'
+        elif dealers_total:
+            if dealers_total > 21:
+                return 'win'
+            elif total == 21 and dealers_total != 21:
+                return 'win'
+            elif total < 21 and 21 >= dealers_total > total:
+                return 'lose'
+            elif dealers_total <= 21 and 21 > total > dealers_total:
+                return 'win'
+            else:
+                return 'draw'
 
     @classmethod
     def current(cls):
@@ -85,7 +103,7 @@ class Game(object):
         session.pop('game', None)
 
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/')
 def index():
     Game.refresh()
     return render_template('index.html')
@@ -93,16 +111,22 @@ def index():
 
 @app.route('/game/', methods=['GET', 'POST'])
 def game():
-
     if 'new' in request.args:
         Game.refresh()
         return redirect(url_for('game'))
 
     current_game = Game.current()
+
+    if 'enough' in request.args:
+        current_game.dealer_take_cards()
+        return redirect(url_for('game'))
+
     if request.method == 'POST':
         current_game.take_card()
         return redirect(url_for('game'))
+
     return render_template('game.html', game=current_game)
+
 
 if __name__ == '__main__':
     app.run(debug=True)

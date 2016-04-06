@@ -1,24 +1,31 @@
 <!DOCTYPE html>
 
 {% if game.last_taken() %}
-    <h1>Выпавшая карта: {{ game.last_taken() }}</h1>
+    <h2>Выпавшая карта: {{ game.last_taken() }}</h2>
 {% endif %}
 
-<h1>Ваши карты: {{ game.hand|join (', ') }}</h1>
-<h1>Количество очков по картам: {{ game.score() }}</h1>
-<h1>Количество очков: {{ game.total() }}</h1>
+<h2>Ваши карты: {{ game.hand|join (', ') }}</h2>
+<h2>Количество очков по картам: {{ game.score() }}</h2>
+<h2>Количество очков: {{ game.total() }}</h2>
+<h2>Карты дилера: {{ game.dealers_hand|join (', ') }}</h2>
+<h2>Количество очков дилера: {{ game.dealers_total() }}</h2>
 
 {% with status = game.status() %}
     {% if status == 'lose' %}
-        <h1>Вы проиграли.</h1>
+        <h2>Вы проиграли.</h2>
     {% elif status == 'win' %}
-        <h1>Вы победили!</h1>
+        <h2>Вы победили!</h2>
+    {% elif status == 'draw' %}
+        <h2>Ничья.</h2>
     {% else %}
         <form action="" method="POST">
             <input type='submit' value='Взять карту'>
         </form>
+        <br>
+        <input type='button' value='Достаточно' onclick="window.location.href='{{ url_for('game') }}?enough'">
+        <br>
     {% endif %}
 {% endwith %}
-
-<h1><a href="{{ url_for('index') }}">Выход</a></h1>
-<h1><a href="{{ url_for('game') }}?new">Новая игра</a></h1>
+<br>
+<input type='button' value='Выход' onclick="window.location.href='{{ url_for('index') }}'">
+<input type='button' value='Новая игра' onclick="window.location.href='{{ url_for('game') }}?new'">
